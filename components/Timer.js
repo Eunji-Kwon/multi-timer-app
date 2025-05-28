@@ -1,29 +1,30 @@
-import React, { useState, useEffect } from 'react';
+// components/Timer.js
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Dimensions } from 'react-native';
-import { timerStyles } from '../styles/TimerStyles';
+import { timerStyles } from '../styles/TimerStyle';
 
 const Timer = ({ 
   id, 
-  onDelete, 
-  isDarkMode, 
+  onDelete,
   mode = 'manual',
   onTimerComplete,
   isActive = false,
-  onActivate
+  onActivate,
+  initialTime = 5
 }) => {
-  const [minutes, setMinutes] = useState('00');
-  const [seconds, setSeconds] = useState('05');
+  const [minutes, setMinutes] = useState(Math.floor(initialTime / 60).toString().padStart(2, '0'));
+  const [seconds, setSeconds] = useState((initialTime % 60).toString().padStart(2, '0'));
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
-  const [totalSeconds, setTotalSeconds] = useState(5);
+  const [totalSeconds, setTotalSeconds] = useState(initialTime);
   const [dimensions, setDimensions] = useState(Dimensions.get('window'));
+  const initialTimeRef = useRef(initialTime);
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
       setDimensions(window);
     });
-
     return () => subscription?.remove();
   }, []);
 
@@ -44,12 +45,14 @@ const Timer = ({
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isRunning, isPaused, totalSeconds, id, onTimerComplete]);
+  }, [isRunning, isPaused, totalSeconds]);
 
   useEffect(() => {
     const mins = parseInt(minutes) || 0;
     const secs = parseInt(seconds) || 0;
-    setTotalSeconds(mins * 60 + secs);
+    const newTotalSeconds = mins * 60 + secs;
+    setTotalSeconds(newTotalSeconds);
+    initialTimeRef.current = newTotalSeconds;
   }, [minutes, seconds]);
 
   useEffect(() => {
@@ -60,10 +63,11 @@ const Timer = ({
 
   const handleStartStop = () => {
     if (isFinished) {
-      setMinutes('00');
-      setSeconds('05');
+      setMinutes(Math.floor(initialTimeRef.current / 60).toString().padStart(2, '0'));
+      setSeconds((initialTimeRef.current % 60).toString().padStart(2, '0'));
       setIsFinished(false);
       setIsPaused(false);
+      setTotalSeconds(initialTimeRef.current);
     } else if (isRunning) {
       setIsPaused(!isPaused);
     } else {
@@ -78,10 +82,13 @@ const Timer = ({
     }
   };
 
-  const formatTime = (totalSecs) => {
-    const mins = Math.floor(totalSecs / 60);
-    const secs = totalSecs % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const handleReset = () => {
+    setMinutes(Math.floor(initialTimeRef.current / 60).toString().padStart(2, '0'));
+    setSeconds((initialTimeRef.current % 60).toString().padStart(2, '0'));
+    setIsRunning(false);
+    setIsPaused(false);
+    setIsFinished(false);
+    setTotalSeconds(initialTimeRef.current);
   };
 
   const handleTimeChange = (text, type) => {
@@ -93,84 +100,63 @@ const Timer = ({
     }
   };
 
+  const formatTime = (totalSecs) => {
+    const mins = Math.floor(totalSecs / 60);
+    const secs = totalSecs % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const getButtonText = () => {
     if (isFinished) return 'Restart';
     if (!isRunning) return 'Start';
     return isPaused ? 'Resume' : 'Pause';
   };
 
-  const isLandscape = dimensions.width > dimensions.height;
-  const containerStyle = {
-    ...timerStyles.container,
-    backgroundColor: isDarkMode ? '#2a2a2a' : '#ffffff',
-    width: isLandscape ? dimensions.width * 0.4 : dimensions.width * 0.8,
-  };
-
   return (
-    <View style={containerStyle}>
+    <View style={timerStyles.container}>
       <View style={timerStyles.header}>
-        <Text style={[
-          timerStyles.timerTitle,
-          { color: isDarkMode ? '#ffffff' : '#333333' }
-        ]}>Timer {id}</Text>
-        <TouchableOpacity onPress={() => onDelete(id)} style={timerStyles.deleteButton}>
-          <Text style={timerStyles.deleteButtonText}>×</Text>
-        </TouchableOpacity>
+        <Text style={timerStyles.title}>Timer {id}</Text>
+        <View style={timerStyles.headerButtons}>
+          <TouchableOpacity onPress={handleReset} style={timerStyles.iconButton}>
+            <Text style={timerStyles.iconText}>↺</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => onDelete(id)} style={timerStyles.iconButton}>
+            <Text style={timerStyles.iconText}>×</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      
+
       {!isRunning && !isFinished ? (
         <View style={timerStyles.timeInputContainer}>
           <TextInput
-            style={[
-              timerStyles.timeInput,
-              { color: isDarkMode ? '#ffffff' : '#000000' }
-            ]}
+            style={timerStyles.timeInput}
             value={minutes}
             onChangeText={(text) => handleTimeChange(text, 'minutes')}
             keyboardType="number-pad"
             maxLength={2}
-            placeholderTextColor={isDarkMode ? '#666666' : '#999999'}
+            placeholder="00"
           />
-          <Text style={[
-            timerStyles.timeSeparator,
-            { color: isDarkMode ? '#ffffff' : '#000000' }
-          ]}>:</Text>
+          <Text style={timerStyles.timeSeparator}>:</Text>
           <TextInput
-            style={[
-              timerStyles.timeInput,
-              { color: isDarkMode ? '#ffffff' : '#000000' }
-            ]}
+            style={timerStyles.timeInput}
             value={seconds}
             onChangeText={(text) => handleTimeChange(text, 'seconds')}
             keyboardType="number-pad"
             maxLength={2}
-            placeholderTextColor={isDarkMode ? '#666666' : '#999999'}
+            placeholder="00"
           />
         </View>
       ) : (
-        <Text style={[
-          timerStyles.timerText,
-          { color: isDarkMode ? '#ffffff' : '#000000' }
-        ]}>{formatTime(totalSeconds)}</Text>
+        <Text style={timerStyles.timerText}>{formatTime(totalSeconds)}</Text>
       )}
 
-      <View style={timerStyles.buttonContainer}>
-        <TouchableOpacity 
-          style={[
-            timerStyles.button,
-            isRunning && !isPaused && timerStyles.buttonRunning,
-            isFinished && timerStyles.buttonReset,
-            isPaused && timerStyles.buttonPaused
-          ]} 
-          onPress={handleStartStop}
-        >
-          <Text style={timerStyles.buttonText}>
-            {getButtonText()}
-          </Text>
+      {mode === 'manual' && (
+        <TouchableOpacity style={timerStyles.controlButton} onPress={handleStartStop}>
+          <Text style={timerStyles.controlButtonText}>{getButtonText()}</Text>
         </TouchableOpacity>
-      </View>
+      )}
     </View>
   );
 };
 
-export default Timer; 
+export default Timer;

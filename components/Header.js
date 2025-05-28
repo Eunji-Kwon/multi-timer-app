@@ -1,38 +1,32 @@
+// components/Header.js
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { headerStyles } from '../styles/HeaderStyles';
+import { View, Text, StyleSheet } from 'react-native';
 
-const Header = ({ isDarkMode, isLandscape, onToggleDarkMode, onToggleOrientation }) => {
+const Header = ({ isLandscape }) => {
   return (
-    <View style={[
-      headerStyles.container,
-      { backgroundColor: isDarkMode ? '#2a2a2a' : '#ffffff' }
-    ]}>
-      <View style={headerStyles.buttonContainer}>
-        <TouchableOpacity 
-          style={headerStyles.button} 
-          onPress={onToggleOrientation}
-        >
-          <Ionicons 
-            name={isLandscape ? "phone-portrait" : "phone-landscape"} 
-            size={24} 
-            color={isDarkMode ? "#ffffff" : "#000000"} 
-          />
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={headerStyles.button} 
-          onPress={onToggleDarkMode}
-        >
-          <Ionicons 
-            name={isDarkMode ? "sunny-outline" : "moon-outline"} 
-            size={24} 
-            color={isDarkMode ? "#ffffff" : "#000000"} 
-          />
-        </TouchableOpacity>
-      </View>
+    <View style={[styles.container]}>
+      <Text style={styles.title}>Multi Timer</Text>
     </View>
   );
 };
 
-export default Header; 
+export default Header;
+
+const styles = StyleSheet.create({
+  container: {
+    paddingTop: 50,
+    paddingBottom: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  }
+});

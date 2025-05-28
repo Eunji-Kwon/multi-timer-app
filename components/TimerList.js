@@ -1,11 +1,12 @@
+// components/TimerList.js
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, ScrollView, Dimensions } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Text, useWindowDimensions, StyleSheet } from 'react-native';
 import Timer from './Timer';
-import { timerListStyles } from '../styles/TimerListStyles';
 
-const TimerList = ({ isDarkMode, isLandscape }) => {
-  const [timers, setTimers] = useState([1]); // Initial timer
-  const windowWidth = Dimensions.get('window').width;
+const TimerList = () => {
+  const [timers, setTimers] = useState([1]);
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   const addTimer = () => {
     setTimers(prev => [...prev, prev.length + 1]);
@@ -16,55 +17,63 @@ const TimerList = ({ isDarkMode, isLandscape }) => {
   };
 
   return (
-    <View style={[
-      timerListStyles.container,
-      { backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f5f5' }
-    ]}>
-      <ScrollView 
-        style={timerListStyles.scrollView}
+    <View style={styles.container}>
+      <ScrollView
         contentContainerStyle={[
-          timerListStyles.scrollContent,
-          isLandscape && {
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            justifyContent: 'flex-start',
-            padding: 10,
-          }
+          styles.scrollContainer,
+          isLandscape && styles.scrollContainerLandscape
         ]}
       >
         {timers.map(id => (
-          <View 
-            key={id} 
-            style={[
-              timerListStyles.timerWrapper,
-              isLandscape && {
-                width: (windowWidth - 40) / 2,
-                margin: 5,
-              }
-            ]}
+          <View
+            key={id}
+            style={[styles.timerWrapper, isLandscape && styles.timerWrapperLandscape]}
           >
-            <Timer 
-              id={id} 
-              onDelete={deleteTimer}
-              isDarkMode={isDarkMode}
-            />
+            <Timer id={id} onDelete={deleteTimer} />
           </View>
         ))}
       </ScrollView>
-      <TouchableOpacity 
-        style={[
-          timerListStyles.addButton,
-          { backgroundColor: isDarkMode ? '#2a2a2a' : '#007AFF' }
-        ]} 
-        onPress={addTimer}
-      >
-        <Text style={[
-          timerListStyles.addButtonText,
-          { color: isDarkMode ? '#ffffff' : '#ffffff' }
-        ]}>+ Add Timer</Text>
+      <TouchableOpacity style={styles.addButton} onPress={addTimer}>
+        <Text style={styles.addButtonText}>+ Add Timer</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-export default TimerList; 
+export default TimerList;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 10,
+  },
+  scrollContainer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+    gap: 20,
+  },
+  scrollContainerLandscape: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+  },
+  timerWrapper: {
+    width: '90%',
+  },
+  timerWrapperLandscape: {
+    width: '45%',
+  },
+  addButton: {
+    backgroundColor: '#007AFF',
+    padding: 12,
+    margin: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+});

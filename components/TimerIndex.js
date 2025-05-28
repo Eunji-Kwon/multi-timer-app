@@ -1,21 +1,15 @@
+// components/TimerIndex.js
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
 
-const TimerIndex = ({ selectedIndex, onSelectIndex, isDarkMode, isTablet }) => {
+const TimerIndex = ({ selectedIndex, onSelectIndex }) => {
   const indices = Array.from({ length: 9 }, (_, i) => i + 1);
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   return (
-    <View style={[
-      styles.container,
-      isTablet && styles.containerTablet,
-      { backgroundColor: isDarkMode ? '#1a1a1a' : '#f5f5f5' }
-    ]}>
-      <Text style={[
-        styles.title,
-        { color: isDarkMode ? '#ffffff' : '#333333' }
-      ]}>
-        Timers
-      </Text>
+    <View style={[styles.container, isLandscape && styles.containerLandscape]}>
+      <Text style={styles.title}>Timers</Text>
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
@@ -27,17 +21,12 @@ const TimerIndex = ({ selectedIndex, onSelectIndex, isDarkMode, isTablet }) => {
               key={index}
               style={[
                 styles.indexItem,
-                isTablet && styles.indexItemTablet,
-                selectedIndex === index && styles.selectedItem,
-                { backgroundColor: isDarkMode ? '#2a2a2a' : '#ffffff' }
+                isLandscape && styles.indexItemLandscape,
+                selectedIndex === index && styles.selectedItem
               ]}
               onPress={() => onSelectIndex(index)}
             >
-              <Text style={[
-                styles.indexText,
-                isTablet && styles.indexTextTablet,
-                { color: isDarkMode ? '#ffffff' : '#333333' }
-              ]}>
+              <Text style={[styles.indexText, isLandscape && styles.indexTextLandscape]}>
                 {index}
               </Text>
             </TouchableOpacity>
@@ -48,6 +37,8 @@ const TimerIndex = ({ selectedIndex, onSelectIndex, isDarkMode, isTablet }) => {
   );
 };
 
+export default TimerIndex;
+
 const styles = StyleSheet.create({
   container: {
     width: 80,
@@ -55,8 +46,9 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRightWidth: 1,
     borderRightColor: '#e0e0e0',
+    backgroundColor: '#f5f5f5',
   },
-  containerTablet: {
+  containerLandscape: {
     width: 100,
     padding: 15,
   },
@@ -65,6 +57,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
     textAlign: 'center',
+    color: '#333333',
   },
   scrollView: {
     flex: 1,
@@ -84,6 +77,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
+    backgroundColor: '#ffffff',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -93,7 +87,7 @@ const styles = StyleSheet.create({
     shadowRadius: 1.41,
     elevation: 2,
   },
-  indexItemTablet: {
+  indexItemLandscape: {
     width: 50,
     height: 50,
     borderRadius: 25,
@@ -104,10 +98,9 @@ const styles = StyleSheet.create({
   indexText: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#333333',
   },
-  indexTextTablet: {
+  indexTextLandscape: {
     fontSize: 20,
   },
 });
-
-export default TimerIndex; 
