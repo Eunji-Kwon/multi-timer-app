@@ -28,24 +28,29 @@ const Timer = ({
     return () => subscription?.remove();
   }, []);
 
-  useEffect(() => {
-    let interval;
-    if (isRunning && !isPaused && totalSeconds > 0) {
-      interval = setInterval(() => {
-        setTotalSeconds((prevTime) => {
-          if (prevTime <= 1) {
-            setIsRunning(false);
-            setIsPaused(false);
-            setIsFinished(true);
+useEffect(() => {
+  let interval;
+  if (isRunning && !isPaused && totalSeconds > 0) {
+    interval = setInterval(() => {
+      setTotalSeconds((prevTime) => {
+        if (prevTime <= 1) {
+          setIsRunning(false);
+          setIsPaused(false);
+          setIsFinished(true);
+          
+          setTimeout(() => {
             onTimerComplete?.(id);
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isRunning, isPaused, totalSeconds]);
+          }, 0);
+
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+  }
+  return () => clearInterval(interval);
+}, [isRunning, isPaused, totalSeconds]);
+
 
   useEffect(() => {
     const mins = parseInt(minutes) || 0;
