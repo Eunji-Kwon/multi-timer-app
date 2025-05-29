@@ -11,7 +11,8 @@ export default function App() {
   ]);
   const [activeTimerId, setActiveTimerId] = useState(null);
   const [globalMode, setGlobalMode] = useState('manual');
-  const [isSequentialRunning, setIsSequentialRunning] = useState(false);
+  //const [isSequentialRunning, setIsSequentialRunning] = useState(false);
+const [sequentialStatus, setSequentialStatus] = useState('idle');
 
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
@@ -26,15 +27,28 @@ export default function App() {
     setTimers(timers.filter(timer => timer.id !== id));
   };
 
+  // const handleGlobalStart = () => {
+  //   if (globalMode === 'sequential') {
+  //     setIsSequentialRunning(true);
+  //     setActiveTimerId(timers[0].id);
+  //   } else if (globalMode === 'simultaneous') {
+  //     setIsSequentialRunning(true);
+  //     setActiveTimerId(timers[0].id);
+  //   }
+  // };
   const handleGlobalStart = () => {
-    if (globalMode === 'sequential') {
-      setIsSequentialRunning(true);
+  if (globalMode === 'sequential') {
+    if (sequentialStatus === 'idle') {
+      setSequentialStatus('running');
       setActiveTimerId(timers[0].id);
-    } else if (globalMode === 'simultaneous') {
-      setIsSequentialRunning(true);
-      setActiveTimerId(timers[0].id);
+    } else if (sequentialStatus === 'running') {
+      setSequentialStatus('paused');
+    } else if (sequentialStatus === 'paused') {
+      setSequentialStatus('running');
     }
-  };
+  }
+};
+
 
   const handleTimerComplete = (id) => {
     if (globalMode === 'sequential') {
@@ -43,7 +57,9 @@ export default function App() {
         setActiveTimerId(timers[currentIndex + 1].id);
       } else {
         setActiveTimerId(null);
-        setIsSequentialRunning(false);
+        //setIsSequentialRunning(false);
+        setSequentialStatus('idle');
+
       }
     }
   };
@@ -62,15 +78,30 @@ export default function App() {
         <Text style={styles.title}>Multi Timer</Text>
         <View style={styles.headerButtons}>
           {(globalMode === 'sequential' || globalMode === 'simultaneous') && (
+            // <TouchableOpacity 
+            //   style={[styles.globalStartButton, isSequentialRunning && styles.globalStartButtonRunning]}
+            //   onPress={handleGlobalStart}
+            //   disabled={isSequentialRunning}
+            // >
+            //   <Text style={styles.globalStartButtonText}>
+            //     {isSequentialRunning ? 'Running...' : `Start ${globalMode}`}
+            //   </Text>
+            // </TouchableOpacity>
             <TouchableOpacity 
-              style={[styles.globalStartButton, isSequentialRunning && styles.globalStartButtonRunning]}
-              onPress={handleGlobalStart}
-              disabled={isSequentialRunning}
-            >
-              <Text style={styles.globalStartButtonText}>
-                {isSequentialRunning ? 'Running...' : `Start ${globalMode}`}
-              </Text>
-            </TouchableOpacity>
+            style={[
+              styles.globalStartButton,
+              sequentialStatus === 'running' && styles.globalStartButtonRunning,
+              sequentialStatus === 'paused' && styles.globalStartButtonPaused
+            ]}
+            onPress={handleGlobalStart}
+          >
+            <Text style={styles.globalStartButtonText}>
+              {sequentialStatus === 'running' ? 'Pause' :
+              sequentialStatus === 'paused' ? 'Resume' :
+              'Start Sequential'}
+            </Text>
+          </TouchableOpacity>
+
           )}
           <TouchableOpacity 
             style={[styles.addButton, timers.length >= 6 && styles.addButtonDisabled]}
@@ -97,6 +128,7 @@ export default function App() {
               onActivate={handleTimerActivate}
               mode={globalMode}
               initialTime={timer.time}
+              status={sequentialStatus} 
             />
           ))}
         </View>
@@ -109,7 +141,9 @@ export default function App() {
             style={[styles.tabButton, globalMode === mode && styles.tabButtonActive]}
             onPress={() => {
               setGlobalMode(mode);
-              setIsSequentialRunning(false);
+              //setIsSequentialRunning(false);
+              setSequentialStatus('idle');
+
               setActiveTimerId(null);
             }}
           >
@@ -159,9 +193,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0'
   },
   tabButtonActive: {
-    backgroundColor: '#FF9500'
+    backgroundColor: '#FF95x00'
   },
   tabButtonText: {
     fontWeight: 'bold', color: '#333'
-  }
+  },
+  globalStartButtonPaused: {
+  backgroundColor: '#FF9500',
+}
+
 });

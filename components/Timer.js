@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Dimensions } from 'react-native';
 import { timerStyles } from '../styles/TimerStyle';
 
+// status = 'idle' | 'running' | 'paused'
 const Timer = ({ 
   id, 
   onDelete,
@@ -10,7 +11,8 @@ const Timer = ({
   onTimerComplete,
   isActive = false,
   onActivate,
-  initialTime = 5
+  initialTime = 5,
+  status 
 }) => {
   const [minutes, setMinutes] = useState(Math.floor(initialTime / 60).toString().padStart(2, '0'));
   const [seconds, setSeconds] = useState((initialTime % 60).toString().padStart(2, '0'));
@@ -60,11 +62,28 @@ useEffect(() => {
     initialTimeRef.current = newTotalSeconds;
   }, [minutes, seconds]);
 
+  // useEffect(() => {
+  //   if (isActive && mode === 'sequential' && !isRunning && !isFinished) {
+  //     setIsRunning(true);
+  //   }
+  // }, [isActive, mode]);
+  
   useEffect(() => {
-    if (isActive && mode === 'sequential' && !isRunning && !isFinished) {
-      setIsRunning(true);
+  if (mode === 'sequential' && isActive) {
+    if (status === 'running') {
+      if (!isRunning && !isFinished) {
+        setIsRunning(true);
+        setIsPaused(false);
+      } else if (isRunning && isPaused) {
+
+        setIsPaused(false);
+      }
+    } else if (status === 'paused' && isRunning && !isPaused) {
+      setIsPaused(true);
     }
-  }, [isActive, mode]);
+  }
+}, [status, isActive, mode, isRunning, isPaused, isFinished]);
+
 
   const handleStartStop = () => {
     if (isFinished) {
