@@ -125,6 +125,8 @@ const [sequentialStatus, setSequentialStatus] = useState('idle');
           <ScrollView contentContainerStyle={styles.timerContainer} horizontal={false}>
             <View style={[styles.gridWrapper, isLandscape && styles.gridLandscape]}>
               {timers.map(timer => (
+                    <View key={timer.id} style={styles.timerCard}>
+
                 <Timer
                   key={timer.id}
                   id={timer.id}
@@ -136,6 +138,7 @@ const [sequentialStatus, setSequentialStatus] = useState('idle');
                   initialTime={timer.time}
                   status={sequentialStatus} 
                 />
+                </View>
               ))}
             </View>
           </ScrollView>
@@ -165,7 +168,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
   mainRow: { flex: 1, flexDirection: 'row' },
 favoritesWrapper: {
-  width: '10%', // takes up exactly 10% of the row
+  width: '10%', 
   backgroundColor: '#ffffff',
   borderRightWidth: 1,
   borderRightColor: '#e0e0e0',
@@ -215,9 +218,16 @@ favoriteText: {
   addButtonText: { color: '#fff', fontWeight: 'bold' },
   timerContainer: { padding: 20 },
   gridWrapper: {
-    flexDirection: 'column',
-    gap: 16,
-  },
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  justifyContent: 'space-between',
+  paddingHorizontal: 10,
+},
+timerCard: {
+  width: '25%', // 3 cards per row
+  marginBottom: 20,
+  
+},
   gridLandscape: {
     flexDirection: 'row',
     flexWrap: 'wrap',
