@@ -9,6 +9,9 @@
       "distribution": "internal"
     },
     "preview": {
+      "cache": {
+        "disabled": true
+      },
       "distribution": "internal"
     },
     "production": {
