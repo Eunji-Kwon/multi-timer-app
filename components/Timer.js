@@ -20,15 +20,9 @@ const Timer = ({
   const [isPaused, setIsPaused] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [totalSeconds, setTotalSeconds] = useState(initialTime);
-  const [dimensions, setDimensions] = useState(Dimensions.get('window'));
   const initialTimeRef = useRef(initialTime);
 
-  useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
-      setDimensions(window);
-    });
-    return () => subscription?.remove();
-  }, []);
+
 
 useEffect(() => {
   let interval;
@@ -62,11 +56,7 @@ useEffect(() => {
     initialTimeRef.current = newTotalSeconds;
   }, [minutes, seconds]);
 
-  // useEffect(() => {
-  //   if (isActive && mode === 'sequential' && !isRunning && !isFinished) {
-  //     setIsRunning(true);
-  //   }
-  // }, [isActive, mode]);
+
   
   useEffect(() => {
   if (mode === 'sequential' && isActive) {
@@ -84,6 +74,21 @@ useEffect(() => {
   }
 }, [status, isActive, mode, isRunning, isPaused, isFinished]);
 
+
+useEffect(() => {
+  if (mode === 'simultaneous' && status === 'running') {
+    if (!isRunning && !isFinished) {
+      setIsRunning(true);
+      setIsPaused(false);
+    } else if (isRunning && isPaused) {
+      setIsPaused(false);
+    }
+  } else if (mode === 'simultaneous' && status === 'paused') {
+    if (isRunning && !isPaused) {
+      setIsPaused(true);
+    }
+  }
+}, [mode, status, isRunning, isPaused, isFinished]);
 
   const handleStartStop = () => {
     if (isFinished) {
@@ -174,11 +179,24 @@ useEffect(() => {
         <Text style={timerStyles.timerText}>{formatTime(totalSeconds)}</Text>
       )}
 
+  
+
       {mode === 'manual' && (
-        <TouchableOpacity style={timerStyles.controlButton} onPress={handleStartStop}>
-          <Text style={timerStyles.controlButtonText}>{getButtonText()}</Text>
-        </TouchableOpacity>
-      )}
+  <TouchableOpacity style={timerStyles.controlButton} onPress={handleStartStop}>
+    <Text style={timerStyles.controlButtonText}>{getButtonText()}</Text>
+  </TouchableOpacity>
+)}
+{mode === 'simultaneous' && (
+  <Text style={[timerStyles.controlButtonText, { opacity: 0.4 }]}>
+    Controlled by Group
+  </Text>
+)}
+{mode === 'sequential' && (
+  <Text style={[timerStyles.controlButtonText, { opacity: 0.4 }]}>
+    Sequential Mode
+  </Text>
+)}
+
     </View>
   );
 };

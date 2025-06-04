@@ -27,30 +27,53 @@ const [sequentialStatus, setSequentialStatus] = useState('idle');
     setTimers(timers.filter(timer => timer.id !== id));
   };
 
-  // const handleGlobalStart = () => {
-  //   if (globalMode === 'sequential') {
-  //     setIsSequentialRunning(true);
-  //     setActiveTimerId(timers[0].id);
-  //   } else if (globalMode === 'simultaneous') {
-  //     setIsSequentialRunning(true);
-  //     setActiveTimerId(timers[0].id);
-  //   }
-  // };
+ 
 
   // Toggle between start, pause, and resume for sequential mode
-
-  const handleGlobalStart = () => {
+const handleGlobalStart = () => {
   if (globalMode === 'sequential') {
     if (sequentialStatus === 'idle') {
       setSequentialStatus('running');
-      setActiveTimerId(timers[0].id);
+      setActiveTimerId(timers[0].id); // Activate the first timer
     } else if (sequentialStatus === 'running') {
       setSequentialStatus('paused');
     } else if (sequentialStatus === 'paused') {
       setSequentialStatus('running');
     }
+  } else if (globalMode === 'simultaneous') {
+    if (sequentialStatus === 'idle' || sequentialStatus === 'paused') {
+      setSequentialStatus('running');
+      setActiveTimerId(null); // simultaneous는 순차 실행 X
+
+      timers.forEach(timer => {
+        handleTimerActivate(timer.id); 
+      });
+    } else if (sequentialStatus === 'running') {
+      setSequentialStatus('paused');
+    }
   }
 };
+
+//   const handleGlobalStart = () => {
+//   if (globalMode === 'sequential') {
+//     if (sequentialStatus === 'idle') {
+//       setSequentialStatus('running');
+//       setActiveTimerId(timers[0].id);
+//     } else if (sequentialStatus === 'running') {
+//       setSequentialStatus('paused');
+//     } else if (sequentialStatus === 'paused') {
+//       setSequentialStatus('running');
+//     }
+//   }
+//   else if (globalMode === 'simultaneous') {
+//     setSequentialStatus('running'); 
+//     setActiveTimerId(null); 
+//      timers.forEach(timer => {
+//       handleTimerActivate(timer.id); // 각 타이머에서 isActive = true로 처리
+//     });
+//   }
+// };
+
 
 
   const handleTimerComplete = (id) => {
@@ -105,11 +128,16 @@ const [sequentialStatus, setSequentialStatus] = useState('idle');
                   ]}
                   onPress={handleGlobalStart}
                 >
+              
                   <Text style={styles.globalStartButtonText}>
-                    {sequentialStatus === 'running' ? 'Pause' :
-                    sequentialStatus === 'paused' ? 'Resume' :
-                    'Start Sequential'}
-                  </Text>
+                {globalMode === 'sequential' ? (
+                  sequentialStatus === 'running' ? 'Pause' :
+                  sequentialStatus === 'paused' ? 'Resume' :
+                  'Start Sequential'
+                ) : (
+                  'Start All Timers'
+                )}
+              </Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity 
@@ -131,7 +159,14 @@ const [sequentialStatus, setSequentialStatus] = useState('idle');
                   key={timer.id}
                   id={timer.id}
                   onDelete={deleteTimer}
-                  isActive={activeTimerId === timer.id}
+                  //isActive={activeTimerId === timer.id}
+                  isActive={
+                              globalMode === 'sequential'
+                                ? activeTimerId === timer.id
+                                : globalMode === 'simultaneous'
+                                  ? sequentialStatus === 'running'
+                                  : false
+                            }
                   onTimerComplete={handleTimerComplete}
                   onActivate={handleTimerActivate}
                   mode={globalMode}
