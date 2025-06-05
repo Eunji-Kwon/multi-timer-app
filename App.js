@@ -4,6 +4,8 @@ import { View, StyleSheet, TouchableOpacity, Text, SafeAreaView, StatusBar, Scro
 import Timer from './components/Timer';
 import TimerList from './components/TimerList'; 
 import FavoritesPanel from './components/FavoritesPanel';
+import styles from './styles/AppStyles';
+
 
 
 export default function App() {
@@ -14,8 +16,7 @@ export default function App() {
   ]);
   const [activeTimerId, setActiveTimerId] = useState(null);
   const [globalMode, setGlobalMode] = useState('manual');
-  //const [isSequentialRunning, setIsSequentialRunning] = useState(false);
-const [sequentialStatus, setSequentialStatus] = useState('idle');
+  const [sequentialStatus, setSequentialStatus] = useState('idle');
 
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
@@ -180,88 +181,3 @@ const handleGlobalStart = () => {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  mainRow: { flex: 1, flexDirection: 'row' },
-favoritesWrapper: {
-  width: '10%', 
-  backgroundColor: '#ffffff',
-  borderRightWidth: 1,
-  borderRightColor: '#e0e0e0',
-},
-
-favoritesContainer: {
-  alignItems: 'center',
-  paddingVertical: 20,
-},
-
-
- favoriteSlot: {
-  width: 40,
-  height: 40,
-  borderRadius: 20,
-  backgroundColor: '#eaeaea',
-  justifyContent: 'center',
-  alignItems: 'center',
-  marginVertical: 8,
-  borderWidth: 1,
-  borderColor: '#bbb',
-},
-favoriteText: {
-  fontSize: 16,
-  color: '#333',
-  fontWeight: 'bold'
-},
-
-  timerArea: { flex: 1 },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20,
-    borderBottomWidth: 1, borderBottomColor: '#e0e0e0'
-  },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#333' },
-  headerButtons: { flexDirection: 'row', gap: 10 },
-  globalStartButton: {
-    backgroundColor: '#007AFF', paddingHorizontal: 16, paddingVertical: 10,
-    borderRadius: 20
-  },
-  globalStartButtonRunning: { backgroundColor: '#34C759' },
-  globalStartButtonText: { color: '#fff', fontWeight: 'bold' },
-  globalStartButtonPaused: { backgroundColor: '#FF9500' },
-  addButton: {
-    backgroundColor: '#007AFF', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20
-  },
-  addButtonDisabled: { backgroundColor: '#ccc' },
-  addButtonText: { color: '#fff', fontWeight: 'bold' },
-  timerContainer: { padding: 20 },
-  gridWrapper: {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  justifyContent: 'space-between',
-  paddingHorizontal: 10,
-},
-timerCard: {
-  width: '25%', // 3 cards per row
-  marginBottom: 20,
-  
-},
-  gridLandscape: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  tabContainer: {
-    flexDirection: 'row', justifyContent: 'space-around', padding: 10,
-    borderTopWidth: 1, borderTopColor: '#e0e0e0', backgroundColor: '#ffffff'
-  },
-  tabButton: {
-    paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10,
-    backgroundColor: '#f0f0f0'
-  },
-  tabButtonActive: {
-    backgroundColor: '#FF9500'
-  },
-  tabButtonText: {
-    fontWeight: 'bold', color: '#333'
-  },
-});
