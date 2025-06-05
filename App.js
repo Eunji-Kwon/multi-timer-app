@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, SafeAreaView, StatusBar, ScrollView, useWindowDimensions } from 'react-native';
 import Timer from './components/Timer';
+import TimerList from './components/TimerList'; 
+import FavoritesPanel from './components/FavoritesPanel';
+
 
 export default function App() {
   const [timers, setTimers] = useState([
@@ -28,7 +31,6 @@ const [sequentialStatus, setSequentialStatus] = useState('idle');
   };
 
  
-
   // Toggle between start, pause, and resume for sequential mode
 const handleGlobalStart = () => {
   if (globalMode === 'sequential') {
@@ -43,7 +45,7 @@ const handleGlobalStart = () => {
   } else if (globalMode === 'simultaneous') {
     if (sequentialStatus === 'idle' || sequentialStatus === 'paused') {
       setSequentialStatus('running');
-      setActiveTimerId(null); // simultaneous는 순차 실행 X
+      setActiveTimerId(null); 
 
       timers.forEach(timer => {
         handleTimerActivate(timer.id); 
@@ -53,27 +55,6 @@ const handleGlobalStart = () => {
     }
   }
 };
-
-//   const handleGlobalStart = () => {
-//   if (globalMode === 'sequential') {
-//     if (sequentialStatus === 'idle') {
-//       setSequentialStatus('running');
-//       setActiveTimerId(timers[0].id);
-//     } else if (sequentialStatus === 'running') {
-//       setSequentialStatus('paused');
-//     } else if (sequentialStatus === 'paused') {
-//       setSequentialStatus('running');
-//     }
-//   }
-//   else if (globalMode === 'simultaneous') {
-//     setSequentialStatus('running'); 
-//     setActiveTimerId(null); 
-//      timers.forEach(timer => {
-//       handleTimerActivate(timer.id); // 각 타이머에서 isActive = true로 처리
-//     });
-//   }
-// };
-
 
 
   const handleTimerComplete = (id) => {
@@ -96,6 +77,10 @@ const handleGlobalStart = () => {
     }
   };
 
+  const [favorites, setFavorites] = useState(Array(9).fill(null));
+
+
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -104,15 +89,27 @@ const handleGlobalStart = () => {
       <View style={styles.mainRow}>
 
         {/* Left-side favorites column */}
-    <View style={styles.favoritesWrapper}>
-  <ScrollView contentContainerStyle={styles.favoritesContainer}>
-    {[...Array(9)].map((_, index) => (
-      <TouchableOpacity key={index} style={styles.favoriteSlot}>
-        <Text style={styles.favoriteText}>{index + 1}</Text>
-      </TouchableOpacity>
-    ))}
-  </ScrollView>
-</View>
+        <FavoritesPanel 
+          favorites={favorites}
+          onLoadSlot={(index) => {
+            const fav = favorites[index];
+            if (fav) {
+              setTimers(fav);
+            }
+          }}
+          onSaveSlot={(index) => {
+            const newFavorites = [...favorites];
+            newFavorites[index] = timers;
+            setFavorites(newFavorites);
+          }}
+          onDeleteSlot={(index) => {
+            const newFavorites = [...favorites];
+            //newFavorites[index] = null;
+              newFavorites[index] = timers.map(t => ({ id: t.id, time: t.time }));
+
+            setFavorites(newFavorites);
+          }}
+        />
 
         {/* Timer area: header, scrollable timers, and mode tabs */}
         <View style={styles.timerArea}>
@@ -150,33 +147,18 @@ const handleGlobalStart = () => {
             </View>
           </View>
 
-          <ScrollView contentContainerStyle={styles.timerContainer} horizontal={false}>
-            <View style={[styles.gridWrapper, isLandscape && styles.gridLandscape]}>
-              {timers.map(timer => (
-                    <View key={timer.id} style={styles.timerCard}>
+     
+            <TimerList
+    timers={timers}
+    isLandscape={isLandscape}
+    activeTimerId={activeTimerId}
+    globalMode={globalMode}
+    sequentialStatus={sequentialStatus}
+    onDelete={deleteTimer}
+    onActivate={handleTimerActivate}
+    onComplete={handleTimerComplete}
+  />
 
-                <Timer
-                  key={timer.id}
-                  id={timer.id}
-                  onDelete={deleteTimer}
-                  //isActive={activeTimerId === timer.id}
-                  isActive={
-                              globalMode === 'sequential'
-                                ? activeTimerId === timer.id
-                                : globalMode === 'simultaneous'
-                                  ? sequentialStatus === 'running'
-                                  : false
-                            }
-                  onTimerComplete={handleTimerComplete}
-                  onActivate={handleTimerActivate}
-                  mode={globalMode}
-                  initialTime={timer.time}
-                  status={sequentialStatus} 
-                />
-                </View>
-              ))}
-            </View>
-          </ScrollView>
 
           <View style={styles.tabContainer}>
             {['sequential', 'simultaneous', 'manual'].map(mode => (

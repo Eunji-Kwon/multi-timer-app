@@ -1,79 +1,64 @@
 // components/TimerList.js
-import React, { useState } from 'react';
-import { View, ScrollView, TouchableOpacity, Text, useWindowDimensions, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import Timer from './Timer';
 
-const TimerList = () => {
-  const [timers, setTimers] = useState([1]);
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
-
-  const addTimer = () => {
-    setTimers(prev => [...prev, prev.length + 1]);
-  };
-
-  const deleteTimer = (id) => {
-    setTimers(prev => prev.filter(timerId => timerId !== id));
-  };
-
+export default function TimerList({
+  timers,
+  isLandscape,
+  activeTimerId,
+  globalMode,
+  sequentialStatus,
+  onDelete,
+  onActivate,
+  onComplete,
+}) {
+  const { width } = useWindowDimensions();
+  const cardWidth = width / 3.2;
   return (
-    <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContainer,
-          isLandscape && styles.scrollContainerLandscape
-        ]}
-      >
-        {timers.map(id => (
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.gridWrapper}>
+        {timers.map(timer => (
           <View
-            key={id}
-            style={[styles.timerWrapper, isLandscape && styles.timerWrapperLandscape]}
+            key={timer.id}
+            style={[styles.timerWrapper, { width: cardWidth }]}
           >
-            <Timer id={id} onDelete={deleteTimer} />
+            <Timer
+              id={timer.id}
+              initialTime={timer.time}
+              onDelete={onDelete}
+              onActivate={onActivate}
+              onTimerComplete={onComplete}
+              isActive={
+                globalMode === 'sequential'
+                  ? activeTimerId === timer.id
+                  : globalMode === 'simultaneous'
+                    ? sequentialStatus === 'running'
+                    : false
+              }
+              mode={globalMode}
+              status={sequentialStatus}
+            />
           </View>
         ))}
-      </ScrollView>
-      <TouchableOpacity style={styles.addButton} onPress={addTimer}>
-        <Text style={styles.addButtonText}>+ Add Timer</Text>
-      </TouchableOpacity>
-    </View>
+      </View>
+    </ScrollView>
   );
-};
-
-export default TimerList;
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 10,
-  },
   scrollContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-    gap: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
   },
-  scrollContainerLandscape: {
+  gridWrapper: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-around',
+    justifyContent: 'flex-start',
   },
   timerWrapper: {
-    width: '90%',
-  },
-  timerWrapperLandscape: {
-    width: '45%',
-  },
-  addButton: {
-    backgroundColor: '#007AFF',
-    padding: 12,
-    margin: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: '#ffffff',
-    fontWeight: 'bold',
-    fontSize: 16,
+    marginBottom: 16,
+    paddingHorizontal: 6,
   },
 });
+
